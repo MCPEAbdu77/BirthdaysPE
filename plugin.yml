@@ -1,0 +1,17 @@
+---
+name: BirthdaysPE
+version: 1.0.0
+main: MCA7\BirthdaysPE\BirthdaysPE
+api: 4.0.0
+src-namespace-prefix: MCA7\BirthdaysPE
+
+commands:
+  birthday:
+    description: main command
+    aliases: [bp]
+    permission: bp.command
+    
+permissions:
+  bp.command:
+    default: true
+...

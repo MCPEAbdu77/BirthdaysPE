@@ -1,0 +1,32 @@
+#  ____    _          _     _           _
+# | __ )  (_)  _ __  | |_  | |__     __| |   __ _   _   _   ___
+# |  _ \  | | | '__| | __| | '_ \   / _` |  / _` | | | | | / __|
+# | |_) | | | | |    | |_  | | | | | (_| | | (_| | | |_| | \__ \
+# |____/  |_| |_|     \__| |_| |_|  \__,_|  \__,_|  \__, | |___/
+#                                                   |___/
+#                                                 ____    _____
+#      LICENSE: APACHE 2.0 (C) 2022              |  _ \  | ____|
+#      VERSION: v1.0.0                           | |_) | |  _|
+#      AUTHOR: MCA7                              |  __/  | |___
+#                                                |_|     |_____|
+# ====================================================================
+
+# Set the plugin prefix
+
+prefix: "§dBirthdays§aPE"
+
+# This message is send to everyone to
+# inform them of someone's birthday.
+# Use "§" for colour coding.
+# Tags:
+# {player} - name of the player receiving msg
+# {birthdayboi} - name of the player whose birthday is being announced
+# {line} - next line of msg
+
+birthday-announcing-msg: "§aGood day §f{player}§e! §aToday is §b{birthdayboi}'s §abirthday!{line}§aPlease wish them a happy belated birthday ;)"
+
+# This message is send to the person on their birthday
+# Tags apply here too, use "§" for colour coding.
+
+birthday-msg-to-player: "§b§lHappy Birthday §e{birthdayboi}§a!"
+
