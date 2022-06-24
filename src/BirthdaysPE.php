@@ -17,7 +17,7 @@ use pocketmine\command\CommandSender;
 
 class BirthdaysPE extends PluginBase implements Listener
 {
-
+        private $db;
 	private $HBD = []; //TODO
 	private const SEP = " §l§8|§r ";
 
