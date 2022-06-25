@@ -9,9 +9,9 @@ commands:
   birthday:
     description: main command
     aliases: [bp]
-    permission: birthdaype.command
+    permission: birthdayspe.command
     
 permissions:
-  birthdaype.command:
+  birthdayspe.command:
     default: true
 ...
