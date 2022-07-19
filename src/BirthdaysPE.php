@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MCA7\BirthdaysPE;
+namespace EPT\BirthdaysPE;
 
 use DateTime;
 use pocketmine\player\Player;
@@ -13,26 +13,35 @@ use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat as C;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use poggit\libasynql\DataConnector;
+use poggit\libasynql\libasynql;
+use SQLite3;
 
 
 class BirthdaysPE extends PluginBase implements Listener
 {
-        private $db;
-	private $HBD = []; //TODO
+
 	private const SEP = " §l§8|§r ";
+	private DataConnector $database;
+	private $arrayed = [];
 
 	public function onEnable(): void
 	{
-		$this->db = new Config($this->getDataFolder() . "birthdaylist.yml");
+		$this->database = $database = libasynql::create($this, $this->getConfig()->get("database"), ["mysql" => "mysql.sql", "sqlite" => "sqlite.sql"]);
+		$this->database->executeGeneric("init.load");
+		$this->database->waitAll();
+		$this->database->executeSelect("init.view", [], function(array $rows) : void {
+            foreach($rows as $row) {
+                $this->arrayed[] = $row["username"];
+			}
+		});
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 	}
 
 	public function onDisable(): void
 	{
-		if (!$this->HBD) return;
-		foreach ($this->HBD as $one) {
-			unset($one);
-		}
+		$this->database->waitAll();
+		$this->database->close();
 	}
 
 	public function onJoin(PlayerJoinEvent $e): void
@@ -40,21 +49,30 @@ class BirthdaysPE extends PluginBase implements Listener
 		$prefix = $this->getConfig()->get('prefix');
 		$player = $e->getPlayer();
 		$date = date("m-d");
-		$con = $this->db->getAll();
-		$bdayboi = array_search($date, $con);
-		if (array_search($date, $con)) {
-			if ($bdayboi === $player->getName()) goto ToTheBirthdayBoi;
-			$conmsg = $this->getConfig()->get('birthday-announcing-msg');
-			$msg = str_replace(["{player}", "{birthdayboi}", "{line}"], [$player->getName(), $bdayboi, "\n"], $conmsg);
-			$player->sendMessage($prefix . self::SEP . $msg);
-			return;
+		if (in_array($player->getName(), $this->arrayed)) {
+			$this->database->executeSelect("init.view", [], function(array $rows) use($player, $date, $prefix) : void {
+				foreach($rows as $row) {
+					if($row["username"] === $player->getName() && $row["date"] === $date) {
+						$conmsg = $this->getConfig()->get('birthday-msg-to-player');
+						$msg = str_replace(["{player}", "{birthdayboi}", "{line}"], [$player->getName(), $row["username"], "\n"], $conmsg);
+						$player->sendMessage($prefix . self::SEP . $msg);
+						$player->sendTitle(C::BOLD."Happy Birthday ^-^", $row["username"], -1, 40, -1);
+					} else {
+                                                if($row["date"] === $date) {
+							$conmsg = $this->getConfig()->get('birthday-announcing-msg');
+							$msg = str_replace(["{player}", "{birthdayboi}", "{line}"], [$player->getName(), $row["username"], "\n"], $conmsg);
+							$player->sendMessage($prefix . self::SEP . $msg);
+						}
+					}
+				}
+			});
+		} else {
+			$this->database->executeInsert("init.create", [
+				"username" => $e->getPlayer()->getName(),
+				"date" => ""
+			]);
+			$this->arrayed[] = $e->getPlayer()->getName();
 		}
-		return;
-		ToTheBirthdayBoi:
-		$conmsg = $this->getConfig()->get('birthday-msg-to-player');
-		$msg = str_replace(["{player}", "{birthdayboi}", "{line}"], [$player->getName(), $bdayboi, "\n"], $conmsg);
-		$player->sendMessage($prefix . self::SEP . $msg);
-		$player->sendTitle(C::BOLD."Happy Birthday ^-^", $bdayboi, -1, 40, -1);
 	}
 
 	private function validateDate($date, $format = 'm-d')
@@ -76,33 +94,44 @@ class BirthdaysPE extends PluginBase implements Listener
 				switch ($args[0]) {
 					case 'set':
 						if (isset($args[1])) {
-							if (!$this->db->getNested($player)) {
-								$set = $args[1];
-								if ($this->validateDate($set)) {
-									$this->db->setNested($player, (string)$set);
-									$sender->sendMessage($prefix . self::SEP . C::GREEN . "Birthday date has been set!");
-									$this->db->save();
-								} else {
-									$sender->sendMessage($prefix . self::SEP . C::RED . "Invalid date! Please set a valid date. FORMAT: MM-DD");
+							$name = $sender->getName();
+							$this->database->executeSelect("init.view", [], function(array $rows) use($name, $sender, $prefix, $args) : void {
+								foreach($rows as $row) {
+									if($row["username"] === $name) {
+										if($row["date"] === "") {
+											$set = $args[1];
+											$set = (string)$set;
+											if ($this->validateDate($set)) {
+												$this->database->executeChange("init.update", ["username" => $sender->getName(), "date" => $set]);
+												$sender->sendMessage($prefix . self::SEP . C::GREEN . "Birthday date has been set!");
+											} else {
+												$sender->sendMessage($prefix . self::SEP . C::RED . "Invalid date! Please set a valid date. FORMAT: MM-DD");
+											}
+										} else {
+											$sender->sendMessage($prefix . self::SEP . C::RED . "Your birthday date has been already set before! \n Use /birthday <reset> to reset your last set date.");
+										}
+									}
 								}
-							} else {
-								$sender->sendMessage($prefix . self::SEP . C::RED . "Your birthday date has been already set before! \n Use /birthday <reset> to reset your last set date.");
-							}
+							});
 						} else {
 							$sender->sendMessage($prefix . self::SEP . C::RED . "Usecase: /birthday set <MONTH-DAY> \n Example: /birthday set 12-22 " . C::WHITE . "(which is December 22nd)");
 						}
-						return true;
+					return true;
 
 					case 'reset':
-
-						if ($this->db->getNested($player)) {
-							$this->db->removeNested($player);
-							$sender->sendMessage($prefix . self::SEP . C::GREEN . "Birthday date has been reset!");
-							$this->db->save();
-						} else {
-							$sender->sendMessage($prefix . self::SEP . C::RED . "You've not set your Birthday before!");
-						}
-						return true;
+                                           $this->database->executeSelect("init.view", [], function(array $rows) use($sender, $prefix) : void {
+                                               foreach($rows as $row) {
+                                                   if($row["username"] === $sender->getName()) {
+                                                       if($row["date"] !== "") {
+                                                           $this->database->executeChange("init.reset", ["username" => $sender->getName()]);
+						           $sender->sendMessage($prefix . self::SEP . C::GREEN . "Birthday date has been reset!");
+                                                       } else {
+                                                           $sender->sendMessage($prefix . self::SEP . C::RED . "You've not set your Birthday before!");
+                                                       }
+                                                   }
+	                  		      }
+		                         });
+				    return true;
 				}
 			} else {
 				$sender->sendMessage($prefix . self::SEP . C::RED . "Usage: /birthday <set/reset>");
