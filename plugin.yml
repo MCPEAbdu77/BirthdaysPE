@@ -1,9 +1,8 @@
 ---
 name: BirthdaysPE
 version: 1.0.0
-main: MCA7\BirthdaysPE\BirthdaysPE
+main: EPT\BirthdaysPE\BirthdaysPE
 api: 4.0.0
-src-namespace-prefix: MCA7\BirthdaysPE
 
 commands:
   birthday:
