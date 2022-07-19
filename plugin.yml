@@ -3,6 +3,7 @@ name: BirthdaysPE
 version: 1.0.0
 main: EPT\BirthdaysPE\BirthdaysPE
 api: 4.0.0
+author: MCA7 , EPT
 
 commands:
   birthday:
