@@ -9,7 +9,7 @@ This Pocketmine-MP plugin will let you wish player(s) a happy birthday and notif
  For further customization you can visit the `config.yml` file.
  
 # Permissions
- - `birthdaype.command` - default (switch to 'op' in plugin.yml if you only want the perm holders to use the command)
+ - `birthdayspe.command` - default (switch to 'op' in plugin.yml if you only want the perm holders to use the command)
  
 # Contact
   - Discord: MCA7#1245
