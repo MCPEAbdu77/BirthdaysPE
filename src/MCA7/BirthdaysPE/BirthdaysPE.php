@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace EPT\BirthdaysPE;
+namespace MCA7\BirthdaysPE;
 
 use DateTime;
 use pocketmine\player\Player;
@@ -25,6 +25,7 @@ class BirthdaysPE extends PluginBase implements Listener
 	private DataConnector $database;
 	private $arrayed = [];
 
+
 	public function onEnable(): void
 	{
 		$this->database = $database = libasynql::create($this, $this->getConfig()->get("database"), ["mysql" => "mysql.sql", "sqlite" => "sqlite.sql"]);
@@ -38,11 +39,13 @@ class BirthdaysPE extends PluginBase implements Listener
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 	}
 
+
 	public function onDisable(): void
 	{
 		$this->database->waitAll();
 		$this->database->close();
 	}
+
 
 	public function onJoin(PlayerJoinEvent $e): void
 	{
@@ -75,11 +78,13 @@ class BirthdaysPE extends PluginBase implements Listener
 		}
 	}
 
+
 	private function validateDate($date, $format = 'm-d')
 	{
 		$d = DateTime::createFromFormat($format, $date);
 		return $d && $d->format($format) === $date;
 	}
+
 
 	public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool
 	{
@@ -137,6 +142,8 @@ class BirthdaysPE extends PluginBase implements Listener
 				$sender->sendMessage($prefix . self::SEP . C::RED . "Usage: /birthday <set/reset>");
 			}
 		}
+		
 		return true;
 	}
+
 }

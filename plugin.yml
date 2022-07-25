@@ -1,9 +1,10 @@
 ---
 name: BirthdaysPE
 version: 1.0.0
-main: EPT\BirthdaysPE\BirthdaysPE
+main: MCA7\BirthdaysPE\BirthdaysPE
 api: 4.0.0
-author: MCA7 , EPT
+author: MCA7
+website: https://www.github.com/MCPEAbdu77/BirthdaysPE
 
 commands:
   birthday:
